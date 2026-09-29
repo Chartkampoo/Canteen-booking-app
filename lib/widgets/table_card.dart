@@ -1,21 +1,23 @@
-// หัวข้อ 4: Layout and Widget Tree
-// การประกอบ widget หลายชั้น (Card > Padding > Row > Column ...) เป็น component ที่ใช้ซ้ำได้
-
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/canteen_table.dart';
 
 class TableCard extends StatelessWidget {
   final CanteenTable table;
   final bool isMine; // โต๊ะนี้ผู้ใช้ปัจจุบันเป็นคนจองอยู่หรือไม่
+  final bool isAdmin; // ผู้ใช้เป็นแอดมินหรือไม่
   final VoidCallback onBook;
   final VoidCallback onCancel;
+  final VoidCallback? onDelete; // ฟังก์ชันลบโต๊ะสำหรับแอดมิน
 
   const TableCard({
     super.key,
     required this.table,
     required this.isMine,
+    this.isAdmin = false,
     required this.onBook,
     required this.onCancel,
+    this.onDelete,
   });
 
   @override
@@ -34,7 +36,7 @@ class TableCard extends StatelessWidget {
             // ไอคอนสถานะด้านซ้าย
             CircleAvatar(
               radius: 24,
-              backgroundColor: statusColor.withOpacity(0.15),
+              backgroundColor: statusColor.withValues(alpha: 0.15),
               child: Icon(Icons.table_restaurant, color: statusColor),
             ),
             const SizedBox(width: 14),
@@ -51,20 +53,61 @@ class TableCard extends StatelessWidget {
                   Text(table.location, style: TextStyle(color: Colors.grey[600])),
                   const SizedBox(height: 2),
                   Text('นั่งได้ ${table.capacity} ที่'),
-                  if (table.isBooked)
-                    Text(
-                      isMine ? 'คุณจองโต๊ะนี้อยู่' : 'จองโดย ${table.bookedByName ?? "-"}',
-                      style: TextStyle(color: statusColor, fontWeight: FontWeight.w600),
-                    ),
+                  if (table.isBooked) _buildBookedByInfo(statusColor),
                 ],
               ),
             ),
 
-            // ปุ่มด้านขวา เปลี่ยนตามสถานะ
-            _buildActionButton(),
+            // ปุ่มด้านขวา: ปุ่มแอ็กชันการจอง + ปุ่มลบสำหรับแอดมิน
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildActionButton(),
+                if (isAdmin && onDelete != null) ...[
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    tooltip: 'ลบโต๊ะ (Admin)',
+                    onPressed: onDelete,
+                  ),
+                ],
+              ],
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  // ดึงชื่อผู้จองแบบ Real-time จาก Firestore users เพื่อให้ชื่ออัปเดตตรงกับปัจจุบันทันที
+  Widget _buildBookedByInfo(Color statusColor) {
+    if (table.bookedByUid == null || table.bookedByUid!.isEmpty) {
+      final name = table.bookedByName ?? '-';
+      return Text(
+        isMine ? 'คุณจองโต๊ะนี้อยู่ ($name)' : 'จองโดย $name',
+        style: TextStyle(color: statusColor, fontWeight: FontWeight.w600),
+      );
+    }
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(table.bookedByUid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        String name = table.bookedByName ?? '-';
+        if (snapshot.hasData && snapshot.data!.exists) {
+          final data = snapshot.data!.data() as Map<String, dynamic>?;
+          final currentName = data?['displayName'] as String?;
+          if (currentName != null && currentName.trim().isNotEmpty) {
+            name = currentName.trim();
+          }
+        }
+        return Text(
+          isMine ? 'คุณจองโต๊ะนี้อยู่ ($name)' : 'จองโดย $name',
+          style: TextStyle(color: statusColor, fontWeight: FontWeight.w600),
+        );
+      },
     );
   }
 

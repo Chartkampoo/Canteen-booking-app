@@ -57,12 +57,46 @@ class AuthService {
 
   // อ่านข้อมูลส่วนตัวของผู้ใช้ปัจจุบันจาก Firestore
   Future<AppUser?> fetchProfile(String uid) async {
-    final doc = await _db.collection('users').doc(uid).get();
-    if (!doc.exists) return null;
-    return AppUser.fromMap(uid, doc.data()!);
+    try {
+      final doc = await _db.collection('users').doc(uid).get();
+      if (!doc.exists || doc.data() == null) return null;
+      return AppUser.fromMap(uid, doc.data()!);
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> updateProfile(AppUser user) async {
-    await _db.collection('users').doc(user.uid).update(user.toMap());
+    // 1. อัปเดตข้อมูลใน Firestore collection 'users' (ใช้ set merge: true ป้องกัน error กรณี document ยังไม่เคยมี)
+    await _db
+        .collection('users')
+        .doc(user.uid)
+        .set(user.toMap(), SetOptions(merge: true));
+
+    // 2. อัปเดต displayName ใน Firebase Auth ด้วยเพื่อให้ตรงกันเสมอ
+    if (_auth.currentUser != null && _auth.currentUser!.uid == user.uid) {
+      await _auth.currentUser!.updateDisplayName(user.displayName);
+      await _auth.currentUser!.reload();
+    }
+  }
+
+  // ดึงชื่อแสดงผลล่าสุดจาก Firestore เพื่อให้ได้ข้อมูลปัจจุบันที่สุดเสมอ
+  Future<String> getLatestDisplayName(String uid) async {
+    try {
+      final profile = await fetchProfile(uid);
+      if (profile != null && profile.displayName.trim().isNotEmpty) {
+        return profile.displayName.trim();
+      }
+    } catch (_) {}
+
+    try {
+      await _auth.currentUser?.reload();
+    } catch (_) {}
+
+    final authName = _auth.currentUser?.displayName?.trim();
+    if (authName != null && authName.isNotEmpty) {
+      return authName;
+    }
+    return _auth.currentUser?.email ?? 'ผู้ใช้';
   }
 }

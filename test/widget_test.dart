@@ -1,30 +1,46 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:canteen_booking_app/main.dart';
+import 'package:canteen_booking_app/models/canteen_table.dart';
+import 'package:canteen_booking_app/widgets/table_card.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('TableCard displays table info and delete button for admin',
+      (WidgetTester tester) async {
+    const table = CanteenTable(
+      id: 'table_1',
+      name: 'โต๊ะ A1',
+      location: 'โรงอาหารตึก 1 ชั้น 1',
+      capacity: 4,
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    bool deleteTapped = false;
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TableCard(
+            table: table,
+            isMine: false,
+            isAdmin: true,
+            onBook: () {},
+            onCancel: () {},
+            onDelete: () {
+              deleteTapped = true;
+            },
+          ),
+        ),
+      ),
+    );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // ตรวจสอบชื่อโต๊ะและจำนวนที่นั่ง
+    expect(find.text('โต๊ะ A1'), findsOneWidget);
+    expect(find.text('นั่งได้ 4 ที่'), findsOneWidget);
+
+    // แอดมินต้องเห็นปุ่มลบโต๊ะ
+    final deleteButton = find.byTooltip('ลบโต๊ะ (Admin)');
+    expect(deleteButton, findsOneWidget);
+
+    await tester.tap(deleteButton);
+    expect(deleteTapped, isTrue);
   });
 }

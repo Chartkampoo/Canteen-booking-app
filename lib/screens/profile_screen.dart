@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../models/app_user.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
+import '../services/firestore_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -16,6 +17,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _authService = AuthService();
   final _storageService = StorageService();
+  final _firestoreService = FirestoreService();
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
@@ -34,14 +36,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
-    final uid = _authService.currentUser?.uid;
-    if (uid == null) return;
+    final user = _authService.currentUser;
+    if (user == null) return;
 
-    final profile = await _authService.fetchProfile(uid);
+    final profile = await _authService.fetchProfile(user.uid);
+    if (!mounted) return;
     setState(() {
-      _profile = profile;
-      _nameController.text = profile?.displayName ?? '';
-      _studentIdController.text = profile?.studentId ?? '';
+      _profile = profile ??
+          AppUser(
+            uid: user.uid,
+            email: user.email ?? '',
+            displayName: user.displayName ?? '',
+            studentId: '',
+          );
+      _nameController.text = _profile?.displayName ?? '';
+      _studentIdController.text = _profile?.studentId ?? '';
       _isLoading = false;
     });
   }
@@ -49,6 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // หัวข้อ 9: อ่านค่าจาก Secure Storage มาโชว์สถานะ (ไม่โชว์ค่าจริงทั้งหมด)
   Future<void> _loadTokenStatus() async {
     final token = await _storageService.getAuthToken();
+    if (!mounted) return;
     setState(() {
       _tokenPreview = (token != null && token.length > 12)
           ? '${token.substring(0, 12)}••••••••'
@@ -69,22 +79,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!_formKey.currentState!.validate() || _profile == null) return;
 
     setState(() => _isSaving = true);
-    final updated = AppUser(
-      uid: _profile!.uid,
-      email: _profile!.email,
-      displayName: _nameController.text.trim(),
-      studentId: _studentIdController.text.trim(),
-      isAdmin: _profile!.isAdmin,
-    );
-    await _authService.updateProfile(updated);
-    setState(() {
-      _profile = updated;
-      _isSaving = false;
-    });
-
-    if (mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('บันทึกข้อมูลแล้ว')));
+    try {
+      final updated = AppUser(
+        uid: _profile!.uid,
+        email: _profile!.email,
+        displayName: _nameController.text.trim(),
+        studentId: _studentIdController.text.trim(),
+        isAdmin: _profile!.isAdmin,
+      );
+      await _authService.updateProfile(updated);
+      // อัปเดตชื่อผู้จองบนโต๊ะที่กำลังจองอยู่ทั้งหมดให้เป็นชื่อล่าสุดทันที
+      await _firestoreService.updateBookedUserName(
+        uid: updated.uid,
+        newName: updated.displayName,
+      );
+      if (mounted) {
+        setState(() {
+          _profile = updated;
+          _isSaving = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('บันทึกข้อมูลเรียบร้อยแล้ว')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('เกิดข้อผิดพลาดในการบันทึก: $e')),
+        );
+      }
     }
   }
 
@@ -114,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Center(
               child: CircleAvatar(
                 radius: 44,
-                backgroundColor: Colors.deepOrange.withOpacity(0.15),
+                backgroundColor: Colors.deepOrange.withValues(alpha: 0.15),
                 child: Text(
                   _profile!.displayName.isNotEmpty
                       ? _profile!.displayName[0].toUpperCase()
