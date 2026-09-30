@@ -3,14 +3,14 @@ class AppUser {
   final String email;
   final String displayName;
   final String studentId;
-  final bool isAdmin; // เพิ่มใหม่: true = แอดมิน/เจ้าหน้าที่โรงอาหาร
+  final bool isAdmin;
 
   const AppUser({
     required this.uid,
     required this.email,
     required this.displayName,
     required this.studentId,
-    this.isAdmin = false, // ค่าเริ่มต้น: ทุกคนที่สมัครใหม่ไม่ใช่แอดมิน
+    this.isAdmin = false,
   });
 
   factory AppUser.fromMap(String uid, Map<String, dynamic> data) {

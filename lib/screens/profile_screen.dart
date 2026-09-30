@@ -1,6 +1,3 @@
-// หน้าข้อมูลส่วนตัว: อ่าน/แก้ไขข้อมูลจาก Firestore + Firebase Auth
-// หัวข้อ 9: แสดงสถานะ Secure Storage (auth token ที่เก็บไว้อย่างเข้ารหัส)
-
 import 'package:flutter/material.dart';
 import '../models/app_user.dart';
 import '../services/auth_service.dart';
@@ -26,7 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   AppUser? _profile;
   bool _isLoading = true;
   bool _isSaving = false;
-  String? _tokenPreview; // เก็บ token แบบตัดสั้นไว้โชว์ (ไม่โชว์เต็ม เพื่อความปลอดภัย)
+  String? _tokenPreview;
 
   @override
   void initState() {
@@ -55,7 +52,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  // หัวข้อ 9: อ่านค่าจาก Secure Storage มาโชว์สถานะ (ไม่โชว์ค่าจริงทั้งหมด)
   Future<void> _loadTokenStatus() async {
     final token = await _storageService.getAuthToken();
     if (!mounted) return;
@@ -70,8 +66,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await _storageService.clearAuthToken();
     await _loadTokenStatus();
     if (mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('ล้าง Secure Token แล้ว')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ล้าง Secure Token แล้ว')));
     }
   }
 
@@ -88,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         isAdmin: _profile!.isAdmin,
       );
       await _authService.updateProfile(updated);
-      // อัปเดตชื่อผู้จองบนโต๊ะที่กำลังจองอยู่ทั้งหมดให้เป็นชื่อล่าสุดทันที
+
       await _firestoreService.updateBookedUserName(
         uid: updated.uid,
         newName: updated.displayName,
@@ -143,13 +139,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _profile!.displayName.isNotEmpty
                       ? _profile!.displayName[0].toUpperCase()
                       : '?',
-                  style: const TextStyle(fontSize: 32, color: Colors.deepOrange),
+                  style:
+                      const TextStyle(fontSize: 32, color: Colors.deepOrange),
                 ),
               ),
             ),
             const SizedBox(height: 8),
             Center(
-              child: Text(_profile!.email, style: TextStyle(color: Colors.grey[600])),
+              child: Text(_profile!.email,
+                  style: TextStyle(color: Colors.grey[600])),
             ),
             if (_profile!.isAdmin) ...[
               const SizedBox(height: 4),
@@ -167,7 +165,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 labelText: 'ชื่อ-นามสกุล',
                 border: OutlineInputBorder(),
               ),
-              validator: (v) => (v == null || v.isEmpty) ? 'กรุณากรอกชื่อ' : null,
+              validator: (v) =>
+                  (v == null || v.isEmpty) ? 'กรุณากรอกชื่อ' : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -176,7 +175,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 labelText: 'รหัสนักศึกษา',
                 border: OutlineInputBorder(),
               ),
-              validator: (v) => (v == null || v.isEmpty) ? 'กรุณากรอกรหัสนักศึกษา' : null,
+              validator: (v) =>
+                  (v == null || v.isEmpty) ? 'กรุณากรอกรหัสนักศึกษา' : null,
             ),
             const SizedBox(height: 24),
             FilledButton(
@@ -189,12 +189,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2))
                   : const Text('บันทึกข้อมูล'),
             ),
-
-            // --- หัวข้อ 9: สถานะ Secure Storage ---
             const SizedBox(height: 28),
             const Divider(),
             const SizedBox(height: 8),
-            const Text('ความปลอดภัย', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('ความปลอดภัย',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Card(
               child: Padding(
@@ -215,12 +214,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               : 'ยังไม่มี Token เก็บไว้'),
                           if (_tokenPreview != null)
                             Text(_tokenPreview!,
-                                style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.grey[600])),
                         ],
                       ),
                     ),
                     if (_tokenPreview != null)
-                      TextButton(onPressed: _clearToken, child: const Text('ล้าง')),
+                      TextButton(
+                          onPressed: _clearToken, child: const Text('ล้าง')),
                   ],
                 ),
               ),

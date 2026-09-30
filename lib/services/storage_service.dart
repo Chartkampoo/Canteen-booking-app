@@ -1,7 +1,3 @@
-// หัวข้อ 9: Persistence Data Using Shared Storage
-// - SharedPreferences: เก็บค่าธรรมดา ไม่ลับ เช่น "จำอีเมลไว้", ธีมที่เลือก
-// - FlutterSecureStorage: เก็บค่าที่ควรเข้ารหัส เช่น token/รหัสผ่านชั่วคราว
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -11,7 +7,6 @@ class StorageService {
 
   final _secureStorage = const FlutterSecureStorage();
 
-  // ---- SharedPreferences: ข้อมูลทั่วไป ----
   Future<void> saveRememberedEmail(String email) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyRememberEmail, email);
@@ -37,7 +32,6 @@ class StorageService {
     return prefs.getBool(_keyDarkMode) ?? false;
   }
 
-  // ---- Secure Storage: ข้อมูลอ่อนไหว ----
   Future<void> saveAuthToken(String token) async {
     await _secureStorage.write(key: 'auth_token', value: token);
   }

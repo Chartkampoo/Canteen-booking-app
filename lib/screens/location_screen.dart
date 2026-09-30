@@ -1,13 +1,9 @@
-// หัวข้อ 5: State Management Basics (Stateful vs Stateless ในหน้าเดียวกัน)
-// หน้าสถานที่: แสดงโซนโรงอาหาร และกรองรายการโต๊ะตามโซนที่เลือก
-
 import 'package:flutter/material.dart';
 import '../services/firestore_service.dart';
 import '../widgets/table_card.dart';
 import '../services/auth_service.dart';
 import '../models/canteen_table.dart';
 
-// รายชื่อโซนแบบ static ไว้ก่อน (โปรเจกต์จริงอาจดึงจาก Firestore เช่นกัน)
 const List<Map<String, String>> canteenZones = [
   {'name': 'โรงอาหารตึก 1', 'floor': 'ชั้น 1'},
   {'name': 'โรงอาหารตึก 1', 'floor': 'ชั้น 2'},
@@ -24,12 +20,13 @@ class LocationScreen extends StatefulWidget {
 }
 
 class _LocationScreenState extends State<LocationScreen> {
-  String? _selectedZone; // state: โซนที่ผู้ใช้เลือกดูอยู่ (null = ยังไม่เลือก)
+  String? _selectedZone;
 
   final _firestoreService = FirestoreService();
   final _authService = AuthService();
 
-  Future<void> _handleDeleteTable(BuildContext context, CanteenTable table) async {
+  Future<void> _handleDeleteTable(
+      BuildContext context, CanteenTable table) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -76,7 +73,6 @@ class _LocationScreenState extends State<LocationScreen> {
     final user = _authService.currentUser;
     if (user == null) return;
 
-    // ดึงชื่อล่าสุดจาก Firestore Profile เพื่อให้ได้ชื่อปัจจุบันที่อัปเดตแล้วเสมอ
     final latestName = await _authService.getLatestDisplayName(user.uid);
 
     final success = await _firestoreService.bookTable(
@@ -87,7 +83,9 @@ class _LocationScreenState extends State<LocationScreen> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(success ? 'จองโต๊ะสำเร็จ' : 'โต๊ะนี้เพิ่งถูกจองไปแล้ว')),
+      SnackBar(
+          content:
+              Text(success ? 'จองโต๊ะสำเร็จ' : 'โต๊ะนี้เพิ่งถูกจองไปแล้ว')),
     );
   }
 
@@ -99,7 +97,6 @@ class _LocationScreenState extends State<LocationScreen> {
     return _buildTablesInZone(_selectedZone!);
   }
 
-  // แสดงรายชื่อโซนแบบ Stateless list (ListView.separated)
   Widget _buildZoneList() {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
@@ -121,7 +118,6 @@ class _LocationScreenState extends State<LocationScreen> {
     );
   }
 
-  // แสดงโต๊ะเฉพาะในโซนที่เลือก โดยดึงจาก Firestore แบบ filter
   Widget _buildTablesInZone(String zoneName) {
     final myUid = _authService.currentUser?.uid;
 
@@ -137,8 +133,8 @@ class _LocationScreenState extends State<LocationScreen> {
               ),
               Expanded(
                 child: Text(zoneName,
-                    style:
-                        const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold)),
               ),
               if (widget.isAdmin)
                 IconButton(
@@ -148,7 +144,8 @@ class _LocationScreenState extends State<LocationScreen> {
                     await _firestoreService.seedTablesForLocation(zoneName);
                     if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('เพิ่ม 4 โต๊ะใน $zoneName สำเร็จ')),
+                      SnackBar(
+                          content: Text('เพิ่ม 4 โต๊ะใน $zoneName สำเร็จ')),
                     );
                   },
                 ),
@@ -186,9 +183,11 @@ class _LocationScreenState extends State<LocationScreen> {
                         const SizedBox(height: 16),
                         FilledButton.icon(
                           icon: const Icon(Icons.add_circle_outline),
-                          label: const Text('เพิ่ม 4 โต๊ะในโซนนี้ (คละ 2, 4, 5, 6)'),
+                          label: const Text(
+                              'เพิ่ม 4 โต๊ะในโซนนี้ (คละ 2, 4, 5, 6)'),
                           onPressed: () async {
-                            await _firestoreService.seedTablesForLocation(zoneName);
+                            await _firestoreService
+                                .seedTablesForLocation(zoneName);
                             if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(

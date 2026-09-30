@@ -1,6 +1,3 @@
-// หัวข้อ 8: Working with API
-// เรียก TheMealDB API (ฟรี ไม่ต้องขอ API key) เพื่อสุ่มเมนูอาหารแนะนำประจำวัน
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -9,7 +6,8 @@ class MealOfTheDay {
   final String thumbnailUrl;
   final String category;
 
-  MealOfTheDay({required this.name, required this.thumbnailUrl, required this.category});
+  MealOfTheDay(
+      {required this.name, required this.thumbnailUrl, required this.category});
 
   factory MealOfTheDay.fromJson(Map<String, dynamic> json) {
     return MealOfTheDay(

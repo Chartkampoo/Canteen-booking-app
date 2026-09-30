@@ -1,5 +1,3 @@
-// หัวข้อ 6: Form and Input Handling — ฟอร์มสมัครสมาชิก
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
@@ -46,7 +44,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         displayName: _nameController.text.trim(),
         studentId: _studentIdController.text.trim(),
       );
-      if (mounted) Navigator.of(context).pop(); // กลับไปหน้า login, main.dart จะพาเข้า Home เอง
+      if (mounted) Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
       setState(() => _errorMessage = 'สมัครสมาชิกไม่สำเร็จ: ${e.message}');
     } finally {
@@ -72,7 +70,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'ชื่อ-นามสกุล',
                     border: OutlineInputBorder(),
                   ),
-                  validator: (v) => (v == null || v.isEmpty) ? 'กรุณากรอกชื่อ' : null,
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? 'กรุณากรอกชื่อ' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -82,7 +81,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'รหัสนักศึกษา',
                     border: OutlineInputBorder(),
                   ),
-                  validator: (v) => (v == null || v.isEmpty) ? 'กรุณากรอกรหัสนักศึกษา' : null,
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? 'กรุณากรอกรหัสนักศึกษา' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -92,7 +92,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'อีเมล',
                     border: OutlineInputBorder(),
                   ),
-                  validator: (v) => (v == null || !v.contains('@')) ? 'อีเมลไม่ถูกต้อง' : null,
+                  validator: (v) => (v == null || !v.contains('@'))
+                      ? 'อีเมลไม่ถูกต้อง'
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -102,17 +104,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     labelText: 'รหัสผ่าน',
                     border: OutlineInputBorder(),
                   ),
-                  validator: (v) =>
-                      (v == null || v.length < 6) ? 'รหัสผ่านอย่างน้อย 6 ตัวอักษร' : null,
+                  validator: (v) => (v == null || v.length < 6)
+                      ? 'รหัสผ่านอย่างน้อย 6 ตัวอักษร'
+                      : null,
                 ),
                 if (_errorMessage != null) ...[
                   const SizedBox(height: 8),
-                  Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+                  Text(_errorMessage!,
+                      style: const TextStyle(color: Colors.red)),
                 ],
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: _isLoading ? null : _handleRegister,
-                  style: FilledButton.styleFrom(padding: const EdgeInsets.all(16)),
+                  style:
+                      FilledButton.styleFrom(padding: const EdgeInsets.all(16)),
                   child: _isLoading
                       ? const SizedBox(
                           height: 20,

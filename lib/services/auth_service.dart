@@ -1,6 +1,3 @@
-// หัวข้อ 11: Authentication With Firebase
-// รวมฟังก์ชัน login / register / logout ไว้ที่เดียว เพื่อให้ UI เรียกใช้ง่าย
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/app_user.dart';
@@ -9,12 +6,10 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // stream นี้ใช้เช็คสถานะ login/logout แบบ real-time (ใช้ใน StreamBuilder ที่ main.dart)
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   User? get currentUser => _auth.currentUser;
 
-  // สมัครสมาชิก + สร้างเอกสารข้อมูลส่วนตัวใน Firestore
   Future<UserCredential> register({
     required String email,
     required String password,
@@ -35,7 +30,10 @@ class AuthService {
       studentId: studentId,
     );
 
-    await _db.collection('users').doc(credential.user!.uid).set(newUser.toMap());
+    await _db
+        .collection('users')
+        .doc(credential.user!.uid)
+        .set(newUser.toMap());
 
     return credential;
   }
@@ -55,7 +53,6 @@ class AuthService {
     await _auth.sendPasswordResetEmail(email: email);
   }
 
-  // อ่านข้อมูลส่วนตัวของผู้ใช้ปัจจุบันจาก Firestore
   Future<AppUser?> fetchProfile(String uid) async {
     try {
       final doc = await _db.collection('users').doc(uid).get();
@@ -67,20 +64,17 @@ class AuthService {
   }
 
   Future<void> updateProfile(AppUser user) async {
-    // 1. อัปเดตข้อมูลใน Firestore collection 'users' (ใช้ set merge: true ป้องกัน error กรณี document ยังไม่เคยมี)
     await _db
         .collection('users')
         .doc(user.uid)
         .set(user.toMap(), SetOptions(merge: true));
 
-    // 2. อัปเดต displayName ใน Firebase Auth ด้วยเพื่อให้ตรงกันเสมอ
     if (_auth.currentUser != null && _auth.currentUser!.uid == user.uid) {
       await _auth.currentUser!.updateDisplayName(user.displayName);
       await _auth.currentUser!.reload();
     }
   }
 
-  // ดึงชื่อแสดงผลล่าสุดจาก Firestore เพื่อให้ได้ข้อมูลปัจจุบันที่สุดเสมอ
   Future<String> getLatestDisplayName(String uid) async {
     try {
       final profile = await fetchProfile(uid);

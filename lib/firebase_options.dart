@@ -1,13 +1,3 @@
-// ไฟล์นี้เป็น "ตัวอย่างโครงร่าง" เท่านั้น
-//
-// ในโปรเจกต์จริง ห้ามพิมพ์ไฟล์นี้เอง — ให้รันคำสั่งนี้แทน (ดูขั้นตอนใน README.md):
-//
-//   dart pub global activate flutterfire_cli
-//   flutterfire configure
-//
-// คำสั่งนี้จะสร้างไฟล์ firebase_options.dart ที่มีค่า apiKey, appId, projectId ฯลฯ
-// ของโปรเจกต์ Firebase จริงของคุณให้อัตโนมัติ แล้วมาทับไฟล์นี้
-
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
@@ -29,7 +19,6 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // ค่าด้านล่างเป็นค่า "ตัวอย่างเปล่า" ต้องถูกแทนที่ด้วยค่าจริงจาก flutterfire configure
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'REPLACE_ME',
     appId: 'REPLACE_ME',

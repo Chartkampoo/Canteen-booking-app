@@ -1,6 +1,3 @@
-// หัวข้อ 10: Saving Data On Cloud Storage (Cloud Firestore)
-// จัดการข้อมูลโต๊ะอาหารทั้งหมด: อ่านแบบ real-time, จอง, ยกเลิกจอง
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/canteen_table.dart';
 
@@ -8,7 +5,6 @@ class FirestoreService {
   final CollectionReference _tables =
       FirebaseFirestore.instance.collection('canteen_tables');
 
-  // ใช้ Stream เพื่อให้หน้าจออัปเดตอัตโนมัติเมื่อมีคนจอง/ยกเลิกโต๊ะ
   Stream<List<CanteenTable>> get tablesStream {
     return _tables.orderBy('name').snapshots().map((snapshot) {
       return snapshot.docs
@@ -19,12 +15,10 @@ class FirestoreService {
   }
 
   Stream<List<CanteenTable>> tablesByLocation(String location) {
-    return _tables
-        .where('location', isEqualTo: location)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) =>
-                CanteenTable.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+    return _tables.where('location', isEqualTo: location).snapshots().map(
+        (snapshot) => snapshot.docs
+            .map((doc) => CanteenTable.fromMap(
+                doc.id, doc.data() as Map<String, dynamic>))
             .toList());
   }
 
@@ -36,7 +30,6 @@ class FirestoreService {
     await _tables.doc(tableId).delete();
   }
 
-  // เพิ่มโต๊ะเริ่มต้น 4 โต๊ะต่อสถานที่ (คละที่นั่ง 2, 4, 5, 6) รวม 12 โต๊ะ
   Future<void> seedDefaultTables() async {
     const locations = [
       {'name': 'โรงอาหารตึก 1 ชั้น 1', 'prefix': 'A'},
@@ -74,7 +67,6 @@ class FirestoreService {
     await batch.commit();
   }
 
-  // เพิ่มโต๊ะเริ่มต้น 4 โต๊ะเฉพาะโซนที่ระบุ (คละที่นั่ง 2, 4, 5, 6)
   Future<void> seedTablesForLocation(String locationName) async {
     String prefix = 'A';
     if (locationName.contains('ตึก 1 ชั้น 2')) {
@@ -108,7 +100,6 @@ class FirestoreService {
     await batch.commit();
   }
 
-  // จองโต๊ะ: ใช้ transaction กันปัญหาสองคนกดจองพร้อมกัน
   Future<bool> bookTable({
     required String tableId,
     required String uid,
@@ -119,7 +110,7 @@ class FirestoreService {
       final snapshot = await transaction.get(docRef);
       final data = snapshot.data() as Map<String, dynamic>;
       if (data['isBooked'] == true) {
-        return false; // มีคนจองไปก่อนแล้ว
+        return false;
       }
       transaction.update(docRef, {
         'isBooked': true,
@@ -138,7 +129,6 @@ class FirestoreService {
     });
   }
 
-  // อัปเดตชื่อผู้จองบนโต๊ะที่กำลังจองอยู่ทั้งหมดให้เป็นชื่อใหม่ล่าสุด
   Future<void> updateBookedUserName({
     required String uid,
     required String newName,

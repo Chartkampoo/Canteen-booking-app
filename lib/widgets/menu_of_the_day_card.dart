@@ -1,5 +1,3 @@
-// หัวข้อ 8: Working with API — การ์ดแสดงเมนูแนะนำวันนี้ ดึงจาก REST API ภายนอก
-
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
@@ -49,11 +47,13 @@ class _MenuOfTheDayCardState extends State<MenuOfTheDayCard> {
         return Card(
           margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
           clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           child: Row(
             children: [
               if (meal.thumbnailUrl.isNotEmpty)
-                Image.network(meal.thumbnailUrl, width: 90, height: 90, fit: BoxFit.cover),
+                Image.network(meal.thumbnailUrl,
+                    width: 90, height: 90, fit: BoxFit.cover),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
@@ -65,8 +65,10 @@ class _MenuOfTheDayCardState extends State<MenuOfTheDayCard> {
                       Text(meal.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                      Text('หมวด: ${meal.category}', style: const TextStyle(fontSize: 12)),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 15)),
+                      Text('หมวด: ${meal.category}',
+                          style: const TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),

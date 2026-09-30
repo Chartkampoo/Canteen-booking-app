@@ -1,8 +1,3 @@
-// หัวข้อ 5: State Management (StreamBuilder ฟังข้อมูล real-time)
-// หัวข้อ 7: Navigation and Routing (BottomNavigationBar สลับหน้า)
-// หัวข้อ 8: Working with API (การ์ดเมนูแนะนำวันนี้)
-// หน้าหลัก: แสดงรายการโต๊ะ + สถานะว่าง/ไม่ว่าง + ปุ่ม logout + ปุ่มเพิ่มโต๊ะ (เฉพาะแอดมิน)
-
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
@@ -27,14 +22,14 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isAdmin = false;
 
   List<Widget> get _pages => [
-    _TableListView(
-      firestoreService: _firestoreService,
-      authService: _authService,
-      isAdmin: _isAdmin,
-    ),
-    LocationScreen(isAdmin: _isAdmin),
-    const ProfileScreen(),
-  ];
+        _TableListView(
+          firestoreService: _firestoreService,
+          authService: _authService,
+          isAdmin: _isAdmin,
+        ),
+        LocationScreen(isAdmin: _isAdmin),
+        const ProfileScreen(),
+      ];
 
   @override
   void initState() {
@@ -58,8 +53,12 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('ออกจากระบบ'),
         content: const Text('ต้องการออกจากระบบใช่หรือไม่?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('ยกเลิก')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('ออกจากระบบ')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('ยกเลิก')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('ออกจากระบบ')),
         ],
       ),
     );
@@ -98,7 +97,8 @@ class _HomeScreenState extends State<HomeScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('สร้างโต๊ะเริ่มต้น 4 โต๊ะต่อสถานที่เรียบร้อยแล้ว (12 โต๊ะ)'),
+            content: Text(
+                'สร้างโต๊ะเริ่มต้น 4 โต๊ะต่อสถานที่เรียบร้อยแล้ว (12 โต๊ะ)'),
           ),
         );
       }
@@ -122,26 +122,32 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               TextFormField(
                 controller: nameController,
-                decoration: const InputDecoration(labelText: 'ชื่อโต๊ะ เช่น โต๊ะ A1'),
-                validator: (v) => (v == null || v.isEmpty) ? 'กรุณากรอกชื่อโต๊ะ' : null,
+                decoration:
+                    const InputDecoration(labelText: 'ชื่อโต๊ะ เช่น โต๊ะ A1'),
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'กรุณากรอกชื่อโต๊ะ' : null,
               ),
               TextFormField(
                 controller: locationController,
-                decoration: const InputDecoration(labelText: 'สถานที่ เช่น โรงอาหารตึก 1 ชั้น 1'),
-                validator: (v) => (v == null || v.isEmpty) ? 'กรุณากรอกสถานที่' : null,
+                decoration: const InputDecoration(
+                    labelText: 'สถานที่ เช่น โรงอาหารตึก 1 ชั้น 1'),
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'กรุณากรอกสถานที่' : null,
               ),
               TextFormField(
                 controller: capacityController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'จำนวนที่นั่ง'),
-                validator: (v) =>
-                    (v == null || int.tryParse(v) == null) ? 'กรอกเป็นตัวเลข' : null,
+                validator: (v) => (v == null || int.tryParse(v) == null)
+                    ? 'กรอกเป็นตัวเลข'
+                    : null,
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('ยกเลิก')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('ยกเลิก')),
           FilledButton(
             onPressed: () async {
               if (!formKey.currentState!.validate()) return;
@@ -193,8 +199,10 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) => setState(() => _currentIndex = index),
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.table_restaurant), label: 'จองโต๊ะ'),
-          NavigationDestination(icon: Icon(Icons.location_on), label: 'สถานที่'),
+          NavigationDestination(
+              icon: Icon(Icons.table_restaurant), label: 'จองโต๊ะ'),
+          NavigationDestination(
+              icon: Icon(Icons.location_on), label: 'สถานที่'),
           NavigationDestination(icon: Icon(Icons.person), label: 'โปรไฟล์'),
         ],
       ),
@@ -224,7 +232,6 @@ class _TableListViewState extends State<_TableListView> {
     final user = widget.authService.currentUser;
     if (user == null) return;
 
-    // ดึงชื่อล่าสุดจาก Firestore เพื่อให้ได้ชื่อปัจจุบันที่อัปเดตแล้วเสมอ
     final latestName = await widget.authService.getLatestDisplayName(user.uid);
 
     final success = await widget.firestoreService.bookTable(
@@ -235,7 +242,9 @@ class _TableListViewState extends State<_TableListView> {
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(success ? 'จองโต๊ะสำเร็จ' : 'โต๊ะนี้เพิ่งถูกจองไปแล้ว')),
+        SnackBar(
+            content:
+                Text(success ? 'จองโต๊ะสำเร็จ' : 'โต๊ะนี้เพิ่งถูกจองไปแล้ว')),
       );
     }
   }
@@ -248,7 +257,8 @@ class _TableListViewState extends State<_TableListView> {
     }
   }
 
-  Future<void> _handleDeleteTable(BuildContext context, CanteenTable table) async {
+  Future<void> _handleDeleteTable(
+      BuildContext context, CanteenTable table) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -308,8 +318,9 @@ class _TableListViewState extends State<_TableListView> {
         final allTables = snapshot.data ?? [];
         final availableCount = allTables.where((t) => !t.isBooked).length;
 
-        final sortedTables = [...allTables]
-          ..sort((a, b) => a.isBooked == b.isBooked ? 0 : (a.isBooked ? 1 : -1));
+        final sortedTables = [
+          ...allTables
+        ]..sort((a, b) => a.isBooked == b.isBooked ? 0 : (a.isBooked ? 1 : -1));
 
         final displayedTables = _showAvailableOnly
             ? sortedTables.where((t) => !t.isBooked).toList()
@@ -318,9 +329,7 @@ class _TableListViewState extends State<_TableListView> {
         return ListView(
           padding: EdgeInsets.zero,
           children: [
-            // การ์ดเมนูแนะนำวันนี้ (หัวข้อ 8: Working with API)
             const MenuOfTheDayCard(),
-
             Container(
               width: double.infinity,
               margin: const EdgeInsets.only(top: 12),
@@ -339,15 +348,16 @@ class _TableListViewState extends State<_TableListView> {
                   FilterChip(
                     label: const Text('เฉพาะโต๊ะว่าง'),
                     selected: _showAvailableOnly,
-                    onSelected: (value) => setState(() => _showAvailableOnly = value),
+                    onSelected: (value) =>
+                        setState(() => _showAvailableOnly = value),
                   ),
                 ],
               ),
             ),
-
             if (allTables.isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -357,7 +367,8 @@ class _TableListViewState extends State<_TableListView> {
                       const SizedBox(height: 14),
                       const Text(
                         'ยังไม่มีโต๊ะในระบบ',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -368,7 +379,8 @@ class _TableListViewState extends State<_TableListView> {
                       const SizedBox(height: 20),
                       FilledButton.icon(
                         icon: const Icon(Icons.auto_awesome),
-                        label: const Text('สร้าง 4 โต๊ะต่อสถานที่ (คละ 2, 4, 5, 6)'),
+                        label: const Text(
+                            'สร้าง 4 โต๊ะต่อสถานที่ (คละ 2, 4, 5, 6)'),
                         onPressed: () async {
                           await widget.firestoreService.seedDefaultTables();
                           if (context.mounted) {

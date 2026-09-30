@@ -4,11 +4,11 @@ import '../models/canteen_table.dart';
 
 class TableCard extends StatelessWidget {
   final CanteenTable table;
-  final bool isMine; // โต๊ะนี้ผู้ใช้ปัจจุบันเป็นคนจองอยู่หรือไม่
-  final bool isAdmin; // ผู้ใช้เป็นแอดมินหรือไม่
+  final bool isMine;
+  final bool isAdmin;
   final VoidCallback onBook;
   final VoidCallback onCancel;
-  final VoidCallback? onDelete; // ฟังก์ชันลบโต๊ะสำหรับแอดมิน
+  final VoidCallback? onDelete;
 
   const TableCard({
     super.key,
@@ -33,32 +33,28 @@ class TableCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            // ไอคอนสถานะด้านซ้าย
             CircleAvatar(
               radius: 24,
               backgroundColor: statusColor.withValues(alpha: 0.15),
               child: Icon(Icons.table_restaurant, color: statusColor),
             ),
             const SizedBox(width: 14),
-
-            // ข้อมูลตรงกลาง ขยายเต็มพื้นที่ที่เหลือ
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(table.name,
-                      style:
-                          const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 2),
-                  Text(table.location, style: TextStyle(color: Colors.grey[600])),
+                  Text(table.location,
+                      style: TextStyle(color: Colors.grey[600])),
                   const SizedBox(height: 2),
                   Text('นั่งได้ ${table.capacity} ที่'),
                   if (table.isBooked) _buildBookedByInfo(statusColor),
                 ],
               ),
             ),
-
-            // ปุ่มด้านขวา: ปุ่มแอ็กชันการจอง + ปุ่มลบสำหรับแอดมิน
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -79,7 +75,6 @@ class TableCard extends StatelessWidget {
     );
   }
 
-  // ดึงชื่อผู้จองแบบ Real-time จาก Firestore users เพื่อให้ชื่ออัปเดตตรงกับปัจจุบันทันที
   Widget _buildBookedByInfo(Color statusColor) {
     if (table.bookedByUid == null || table.bookedByUid!.isEmpty) {
       final name = table.bookedByName ?? '-';

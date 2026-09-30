@@ -1,7 +1,3 @@
-// หัวข้อ 6: Form and Input Handling + หัวข้อ 5: State Management (StatefulWidget)
-// หัวข้อ 9: Persistence — SharedPreferences (จำอีเมล) + Secure Storage (เก็บ auth token)
-// หน้า Login: มี TextFormField, การ validate, checkbox "จำอีเมลไว้"
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
@@ -65,8 +61,6 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text,
       );
 
-      // หัวข้อ 9: เก็บ Firebase ID Token ไว้ใน Secure Storage (เข้ารหัส)
-      // เผื่อใช้แนบไปกับ request ไปยัง API ที่ต้องยืนยันตัวตนในอนาคต
       final token = await credential.user?.getIdToken();
       if (token != null) {
         await _storageService.saveAuthToken(token);
@@ -112,7 +106,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.restaurant, size: 72, color: Colors.deepOrange),
+                  const Icon(Icons.restaurant,
+                      size: 72, color: Colors.deepOrange),
                   const SizedBox(height: 12),
                   const Text(
                     'จองโต๊ะโรงอาหาร',
@@ -164,19 +159,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   CheckboxListTile(
                     value: _rememberMe,
-                    onChanged: (value) => setState(() => _rememberMe = value ?? false),
+                    onChanged: (value) =>
+                        setState(() => _rememberMe = value ?? false),
                     title: const Text('จำอีเมลไว้'),
                     controlAffinity: ListTileControlAffinity.leading,
                     contentPadding: EdgeInsets.zero,
                   ),
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 8),
-                    Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+                    Text(_errorMessage!,
+                        style: const TextStyle(color: Colors.red)),
                   ],
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: _isLoading ? null : _handleLogin,
-                    style: FilledButton.styleFrom(padding: const EdgeInsets.all(16)),
+                    style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.all(16)),
                     child: _isLoading
                         ? const SizedBox(
                             height: 20,
@@ -189,7 +187,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const RegisterScreen()),
                       );
                     },
                     child: const Text('ยังไม่มีบัญชี? สมัครสมาชิก'),
